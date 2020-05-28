@@ -4,8 +4,10 @@
 
 Port may be different.
 
+
 ## Hints
 > There are 2 bugs!
+
 
 ## Problem description
 Connecting to server we can see a welcome page of a roulette service. We are assigned a random initial balance to start betting. We are asked to make our bet and to choose a number. That's enough, let's see the provided [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette.c).
@@ -53,7 +55,7 @@ long get_long() {
     return l;
 }
 ```
-Initially `c` is not a digit (it is set to `0` that is the null character) so the function enters the first `while` and, since `stdin` is line buffered, `get_char()` will wait for us to press `enter`. At this point the program will start scanning the buffer one character at a time doing nothing if it is a non-digit (first `while` loop). When a digit is encountered the first loop ends end we enter the second one that will run until we get another non-digit character: the second loop will end and we will enter the third one that keeps ignoring every character until a `\n` (new line character) is found that is the end of the input string. This means that the core of the function is in the second loop: an unsigned 64 bit integer `l` is constructed appending a digit at a time, that is if `l` is `123` and the next digit is `4`, then `l` will become `123*10 + 4` that is `1234`. Before doing this operations, it is checked if `l` is less than `LONG_MAX`, otherwise it will be set to `LONG_MAX` and the `while` will be terminated. `LONG_MAX` is the maximum value a `long` variable can assume and depends on the system: a `long` variable is guaranteed to be at least 32 bits wide but in some systems it can be 64 bit, in particular, the remote application uses 32 bit integers as `long` variables (see [**Solution**](#solution) section for details). We have to notice that `get_long()` returns a `long` variable (that is a signed 32 bit integer) while operations are executed on `l` that is an unsigned 64 bit integer. This fact can be used to pass properly built values for `l` variable that, returned as `long`, will become negative. This will be necessary to use almost arbitrary values bypassing `bet <= cash` condition in `get_bet()` function.
+Initially `c` is not a digit (it is set to `0` that is the null character) so the function enters the first `while` and, since `stdin` is line buffered, `get_char()` will wait for us to press `enter`. At this point the program will start scanning the buffer one character at a time doing nothing if it is a non-digit (first `while` loop). When a digit is encountered the first loop ends end we enter the second one that will run until we get another non-digit character: the second loop will end and we will enter the third one that keeps ignoring every character until a `\n` (new line character) is found that is the end of the input string. This means that the core of the function is in the second loop: an unsigned 64 bit integer `l` is constructed appending a digit at a time, that is if `l` is `123` and the next digit is `4`, then `l` will become `123*10 + 4` that is `1234`. Before doing this operations, it is checked if `l` is less than `LONG_MAX`, otherwise it will be set to `LONG_MAX` and the `while` will be terminated. `LONG_MAX` is the maximum value a `long` variable can assume and depends on the system: a `long` variable is guaranteed to be at least 32 bits wide but in some systems it can be 64 bit, in particular, the remote application uses 32 bit integers as `long` variables (see [**Solution**](#solution) section for details). We have to notice that `get_long()` returns a `long` variable (that is a signed 32 bit integer) while operations are executed on `l` that is an unsigned 64 bit integer. Moreover, the control `l >= LONG_MAX` is done before doing operations and not after, so we can have an `l` value that is less than `LONG_MAX` but after appending a digit it will become greater and, if the while is interrupted, `l` will remain greater than `LONG_MAX`. This fact can be used to pass properly built values for `l` that, returned as `long`, will become negative. This will allow us to assign (almost) arbitrary values to `bet` (even negative ones), bypassing `bet <= cash` condition in `get_bet()` function.
 
 Returning to `main()`, after setting `bet` (and subtracting it from `cash`) and `choice`, `play_roulette(choice, bet)` is called:
 ```c
@@ -78,4 +80,18 @@ void play_roulette(long choice, long bet) {
 ```
 Variable `spin` is randomly set to a value in `[1, 32]` (calling `rand()`) then a useless animation is performed in `spin_roulette(spin)` and if `spin` is equal to our `choice`, we win, a random message is print and `wins` variable is incremented by one. Otherwise two random message are printed to screen.
 
+
 ## Solution
+The two bugs the hint was referring to are these:
+1. the seed used for pseudo-random integer generation is visible in the original value of `cash`;
+2. `get_long()` function returns a signed integer while working on an unsigned one and constrains it to a maximum value only before doing operations.
+
+I created a [modified source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette_mod.c) that takes as input the seed we want to use for generate random numbers. To compile it run (an executable called `roulette_mod` will be created):
+> $ gcc roulette_mod.c -o roulette_mod
+You can check that random sequences are the same using the same seed simply running the program twice passing the same argument:
+> $ ./roulette_mod 1234
+
+Now we can run the remote service, taking note of the random generated seed (that is our initial balance) and start `roulette_mod` with the same seed as argument. This way we can use any input we want in the modified executable to get our first random `spin` result: using this our `choice` in the remote service we will get our first win.
+
+The modified application will print the `spin` result instantly without waiting for the irrilevant animation.
+It is notable that playing roulette and lose will print only one random message instead of two. This is
