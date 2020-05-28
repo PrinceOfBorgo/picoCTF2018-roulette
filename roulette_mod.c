@@ -43,7 +43,7 @@ long get_long() {
     return l;
 }
 
-/* This procedure is no more needed since we set seed (and hence even cash) from command line arguments */
+/* This function is no more needed since we set seed (and hence even cash) from command line arguments */
 // long get_rand() {
 //     long seed;
 //     FILE *f = fopen("/dev/urandom", "r");
