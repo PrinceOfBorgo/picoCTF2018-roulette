@@ -12,7 +12,7 @@ Port may be different.
 ## Problem description
 Connecting to server we can see a welcome page of a roulette service. We are assigned a random initial balance to start betting. We are asked to make our bet and to choose a number. That's enough, let's see the provided [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette.c).
 
-First let's look what we have to do in order to get the flag. As seen in the request we must gain one billion but, actually, it isn't enough... In `main()` we can see that two conditions must be verified to call `print_flag()` function: `cash > ONE_BILLION` and `wins >= HOTSTREAK`. The first condition sounds familiar but the second tells us to win at least three times (`HOTSTREAK = 3`).
+First let's look what we have to do in order to get the flag. As seen in the request we must gain one billion but, actually, it isn't enough... In `main()` we can see that two conditions must be verified to call `print_flag()` function: `cash > ONE_BILLION` and `wins >= HOTSTREAK`. The first condition sounds familiar but the second one tells us to win at least three times (`HOTSTREAK = 3`).
 
 Our current balance is stored in `cash` variable that is initialized in `main()` calling `get_rand()` function:
 ```c
@@ -86,44 +86,114 @@ The two bugs the hint was referring to are these:
 1. the seed used for pseudo-random integer generation is visible in the original value of `cash`;
 2. `get_long()` function returns a signed integer while working on an unsigned one and constrains it to a maximum value only before doing operations.
 
-I created a [modified source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette_mod.c) that takes as input the seed we want to use for generate random numbers. To compile it run (an executable called `roulette_mod` will be created):
-> $ gcc roulette_mod.c -o roulette_mod
+I created an [application](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) (click [here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) for source code) that takes as input the seed we want to use for generate random numbers and, pressing `enter`, prints the result of the roulette spins.
 
-You can check that random sequences are the same using the same seed simply running the program twice passing the same argument:
-> $ ./roulette_mod 1234
-
-Now we can run the remote service, taking note of the random generated seed (readable in our starting balance) and start `roulette_mod` with the same seed as argument. This way we can use any input we want in the modified executable to get our first random `spin` result: using this as our `choice` in the remote service we will get our first win.  
+Now we can run the remote service, take note of the random generated seed (readable in our starting balance) and start `spin_results` with the same seed as argument. This way, pressing `enter`, we will get our first random `spin` result: using this as our `choice` in the remote service we will get our first win.  
 Example:
-```
+<pre>
 $ nc 2018shell.picoctf.com 25443
 Welcome to ONLINE ROULETTE!
-Here, have $4321 to start on the house! You'll lose it all anyways >:)
+Here, have $<b>2634</b> to start on the house! You'll lose it all anyways >:)
 
 How much will you wager?
-Current Balance: $4321 	 Current Wins: 0
+Current Balance: $2634 	 Current Wins: 0
 >
-```
-The seed is `4321`, so we run `roulette_mod` using this value as argument and then we make our bet:
-```
-$ ./roulette_mod 4321
+</pre>
+The seed is `2634`, so we run `spin_results` using this value as argument and then we make our bet:
+<pre>
+$ ./spin_results <b>2634</b>
+Seed: 2634
+
+Press ENTER to get the next spin result:
+Spin: <b>18</b>
+
+Press ENTER to get the next spin result:
+</pre>
+We can see that the result of the first spin is `18`, this will be the same even in the remote application. Let's go all-in and bet on `18`:
+<pre>
+$ nc 2018shell.picoctf.com 25443
 Welcome to ONLINE ROULETTE!
-Here, have $4321 to start on the house! You'll lose it all anyways >:)
+Here, have $2634 to start on the house! You'll lose it all anyways >:)
 
 How much will you wager?
-Current Balance: $4321 	 Current Wins: 0
-> 0
+Current Balance: $2634 	 Current Wins: 0
+> <b>2634</b>
 Choose a number (1-36)
-> 1
+> <b>18</b>
 
-Spinning the Roulette for a chance to win $0!
-spin: 31
-Better luck next time...
+Spinning the Roulette for a chance to win $5268!
+
+Roulette  :  <b>18</b>
+
+You.. win.. this round...
 
 How much will you wager?
-Current Balance: $4321 	 Current Wins: 0
+<b>Current Balance: $5268 	 Current Wins: 1</b>
 >
-```
+</pre>
+It is notable that playing roulette and lose will print two random messages while winning it prints only one. We can assume that we want always win in the remote application so it will always call one `rand()` function for the message instead of two. This way `spin_results` after printing the `spin` result it will call `rand()` just once.
 
+Using the same approach we can easily obtain three wins to get one of the win conditions (`wins >= HOTSTREAK`):
+<pre>
+$ ./spin_results <b>2634</b>
+Seed: 2634
 
-The modified application will print the `spin` result instantly without waiting for the irrilevant animation.
-It is notable that playing roulette and lose will print only one random message instead of two. This is
+Press ENTER to get the next spin result:
+Spin: <b>18</b>
+
+Press ENTER to get the next spin result:
+Spin: <b>10</b>
+
+Press ENTER to get the next spin result:
+Spin: <b>28</b>
+
+Press ENTER to get the next spin result:
+</pre>
+
+<pre>
+$ nc 2018shell.picoctf.com 25443
+Welcome to ONLINE ROULETTE!
+Here, have $<b>2634</b> to start on the house! You'll lose it all anyways >:)
+
+How much will you wager?
+Current Balance: $2634 	 Current Wins: 0
+> 2634
+Choose a number (1-36)
+> <b>18</b>
+
+Spinning the Roulette for a chance to win $5268!
+
+Roulette  :  18
+
+You.. win.. this round...
+
+How much will you wager?
+Current Balance: $5268 	 Current Wins: 1
+> 5268
+Choose a number (1-36)
+> <b>10</b>
+
+Spinning the Roulette for a chance to win $10536!
+
+Roulette  :  10
+
+Darn.. Here you go
+
+How much will you wager?
+Current Balance: $10536 	 Current Wins: 2
+> 10536
+Choose a number (1-36)
+> <b>28</b>
+
+Spinning the Roulette for a chance to win $21072!
+
+Roulette  :  28
+
+Winner!
+
+How much will you wager?
+<b>Current Balance: $21072 	 Current Wins: 3</b>
+>
+</pre>
+
+One could think to use this method even to reach one billion but there is a problem: roulette application sets a maximum number of wins to `16`, after which we are kicked out. Since our initial balance is at most `4999` and we can at most double our current balance at each bet (going all-in), we got a maximum win of `4999 * 2^16 = 327614464` that is way less than one billion.
