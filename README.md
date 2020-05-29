@@ -33,7 +33,7 @@ This tell us that `cash = seed` so the balance we see running the remote service
 
 After setting `cash` and printing it to screen with the welcome message, the program enters in a `while` loop where we are asked to make our `bet` and to choose the number (`choice`) we hope to see after spinning the roulette.
 
-`bet` and `choice` variables are set calling `get_bet()` and `get_choice()` respectively. Both functions work calling `get_long()` and doing a control on the result: `get_bet()` accepts bets that are less or equal to `cash` while `get_choice()` accepts choices in range `[1, 36]`. Let's look to `get_long()` function:
+`bet` and `choice` variables are set calling `get_bet()` and `get_choice()` respectively. Both functions work calling `get_long()` and doing a control on the result: `get_bet()` accepts bets that are less or equal to `cash` while `get_choice()` accepts choices in range `[1, 36]`. Let's look at `get_long()` function:
 ```c
 long get_long() {
     printf("> ");
