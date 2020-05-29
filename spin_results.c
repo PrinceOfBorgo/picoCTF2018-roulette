@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
         sscanf(argv[1], "%ld", &seed);
         srand(seed);    // Set seed for future rand() calls
 
-        printf("Seed: $%ld\n", seed);
+        printf("Seed: %ld\n", seed);
 
         while(1) {
             printf("\nPress ENTER to get the next spin result:");
