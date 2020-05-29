@@ -88,10 +88,42 @@ The two bugs the hint was referring to are these:
 
 I created a [modified source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette_mod.c) that takes as input the seed we want to use for generate random numbers. To compile it run (an executable called `roulette_mod` will be created):
 > $ gcc roulette_mod.c -o roulette_mod
+
 You can check that random sequences are the same using the same seed simply running the program twice passing the same argument:
 > $ ./roulette_mod 1234
 
-Now we can run the remote service, taking note of the random generated seed (that is our initial balance) and start `roulette_mod` with the same seed as argument. This way we can use any input we want in the modified executable to get our first random `spin` result: using this our `choice` in the remote service we will get our first win.
+Now we can run the remote service, taking note of the random generated seed (readable in our starting balance) and start `roulette_mod` with the same seed as argument. This way we can use any input we want in the modified executable to get our first random `spin` result: using this as our `choice` in the remote service we will get our first win.  
+Example:
+```
+$ nc 2018shell.picoctf.com 25443
+Welcome to ONLINE ROULETTE!
+Here, have $4321 to start on the house! You'll lose it all anyways >:)
+
+How much will you wager?
+Current Balance: $4321 	 Current Wins: 0
+>
+```
+The seed is `4321`, so we run `roulette_mod` using this value as argument and then we make our bet:
+```
+$ ./roulette_mod 4321
+Welcome to ONLINE ROULETTE!
+Here, have $4321 to start on the house! You'll lose it all anyways >:)
+
+How much will you wager?
+Current Balance: $4321 	 Current Wins: 0
+> 0
+Choose a number (1-36)
+> 1
+
+Spinning the Roulette for a chance to win $0!
+spin: 31
+Better luck next time...
+
+How much will you wager?
+Current Balance: $4321 	 Current Wins: 0
+>
+```
+
 
 The modified application will print the `spin` result instantly without waiting for the irrilevant animation.
 It is notable that playing roulette and lose will print only one random message instead of two. This is
