@@ -78,7 +78,7 @@ void play_roulette(long choice, long bet) {
     puts("");
 }
 ```
-Variable `spin` is randomly set to a value in `[1, 32]` (calling `rand()`) then a useless animation is performed in `spin_roulette(spin)` and if `spin` is equal to our `choice`, we win, a random message is print and `wins` variable is incremented by one. Otherwise two random message are printed to screen.
+Variable `spin` is randomly set to a value in `[1, 32]` (calling `rand()`) then a useless animation is performed in `spin_roulette(spin)` and if `spin` is equal to our `choice`, we win, a random message is printed and `wins` variable is incremented by one. Otherwise two random message are printed to screen.
 
 
 ## Solution
