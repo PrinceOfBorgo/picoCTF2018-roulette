@@ -27,7 +27,7 @@ long get_rand() {
     return seed;
 }
 ```
-`seed` variable is set to a random value obtained through the special file [`/dev/urandom`](https://en.wikipedia.org/wiki//dev/random) then it is restricted to range `[0, 4999]` taking the remainder of division by 5000 and making the result positive. `srand(seed)` sets `seed` as the seed for a new sequence of pseudo-random integers to be returned by `rand()`. Finally the procedure returns `seed`.
+`seed` variable is set to a random value obtained through the special file [`/dev/urandom`](https://linux.die.net/man/4/urandom) then it is restricted to range `[0, 4999]` taking the remainder of division by 5000 and making the result positive. `srand(seed)` sets `seed` as the seed for a new sequence of pseudo-random integers to be returned by `rand()`. Finally the procedure returns `seed`.
 
 This tell us that `cash = seed` so the balance we see running the remote service is, in fact, the seed used to initialize the sequence of results we will get calling `rand()` function. Knowing the seed we will try to predict what number will result after spinning the roulette (see [**Solution**](#solution) section).
 
