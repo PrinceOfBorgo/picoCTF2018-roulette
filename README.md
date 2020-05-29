@@ -12,7 +12,7 @@ Port may be different.
 ## Problem description
 Connecting to server we can see a welcome page of a roulette service. We are assigned a random initial balance to start betting. We are asked to make our bet and to choose a number. That's enough, let's see the provided [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette.c).
 
-First let's look what we have to do in order to get the flag. As seen in the request we must gain one billion but, actually, it isn't enough... In `main()` we can see that two conditions must be verified to call `print_flag()` function: `cash > ONE_BILLION` and `wins >= HOTSTREAK`. The first condition sounds familiar but the second one tells us to win at least three times (`HOTSTREAK = 3`).
+First let's see what we have to do in order to get the flag. As seen in the request we must gain one billion but, actually, it isn't enough... In `main()` we can see that two conditions must be verified to call `print_flag()` function: `cash > ONE_BILLION` and `wins >= HOTSTREAK`. The first condition sounds familiar but the second one tells us to win at least three times (`HOTSTREAK = 3`).
 
 Our current balance is stored in `cash` variable that is initialized in `main()` calling `get_rand()` function:
 ```c
