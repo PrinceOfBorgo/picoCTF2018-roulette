@@ -86,10 +86,10 @@ The two bugs the hint was referring to are these:
 1. the seed used for pseudo-random integer generation is visible in the original value of `cash`;
 2. `get_long()` function returns a signed integer while working on an unsigned one and constrains it to a maximum value only before doing operations.
 
-I created an [application](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) (click [here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) for source code) that takes as input the seed we want to use for generate random numbers and, pressing ENTER, prints the result of the roulette spins.
+I created an [application](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) (click [here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) for source code) that takes as input the seed we want to use to generate random numbers and, pressing ENTER, prints the numbers obtained spinning the roulette.
 
-Now we can run the remote service, take note of the random generated seed (readable in our starting balance) and start `spin_results` with the same seed as argument. This way, pressing ENTER, we will get our first random `spin` result: using this as our `choice` in the remote service we will get our first win.  
-Example:
+Now we can run the remote service, take note of the random generated seed (readable in our starting balance) and run `spin_results` with that same seed as argument. This way, pressing ENTER, we will get our first random `spin` result: using this as our `choice` in the remote service we will get our first win.  
+Let's see an example:
 <pre>
 $ nc 2018shell.picoctf.com 25443
 Welcome to ONLINE ROULETTE!
@@ -99,7 +99,7 @@ How much will you wager?
 Current Balance: $2634 	 Current Wins: 0
 >
 </pre>
-The seed is `2634`, so we run `spin_results` using this value as argument and then we make our bet:
+The seed is `2634`, so we run `spin_results` using this value as argument and then we press ENTER to get the first result:
 <pre>
 $ ./spin_results <b>2634</b>
 Seed: 2634
@@ -131,9 +131,9 @@ How much will you wager?
 <b>Current Balance: $5268 	 Current Wins: 1</b>
 >
 </pre>
-It is notable that playing roulette and lose will print two random messages while winning it prints only one. We can assume that we want always win in the remote application so it will always call one `rand()` function for the message instead of two. This way `spin_results` after printing the `spin` result it will call `rand()` just once.
+Notice that if we play and lose, the remote application will print two random messages while, winning, only one message will be printed. We can assume that we want to win every time so `rand()` function will be called only once (instead of twice) to print the random message. Hence `spin_results` will call `rand()` (just once) after printing the `spin` result.
 
-Using the same approach we can easily obtain three wins to get one of the win conditions (`wins >= HOTSTREAK`):
+Using the same approach we can easily obtain three wins to satisfy one of the conditions to get the flag (`wins >= HOTSTREAK`):
 <pre>
 $ ./spin_results <b>2634</b>
 Seed: 2634
