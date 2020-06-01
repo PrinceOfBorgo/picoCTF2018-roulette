@@ -29,7 +29,7 @@ long get_rand() {
 ```
 `seed` variable is set to a random value obtained through the special file [`/dev/urandom`](https://linux.die.net/man/4/urandom) then it is restricted to range `[0, 4999]` taking the remainder of division by 5000 and making the result positive. `srand(seed)` sets `seed` as the seed for a new sequence of pseudo-random integers to be returned by `rand()`. Finally the procedure returns `seed`.
 
-This tell us that `cash = seed` so the balance we see running the remote service is, in fact, the seed used to initialize the sequence of results we will get calling `rand()` function. Knowing the seed we will try to predict what number will result after spinning the roulette (see [**Solution**](#solution) section).
+This tell us that `cash = seed` so the balance we see running the remote service is, in fact, the seed used to initialize the sequence of results we will get calling `rand()` function. Knowing the seed we will try to predict what number will result after spinning the roulette (see [**Hard work**](#hard-work) section).
 
 After setting `cash` and printing it to screen with the welcome message, the program enters in a `while` loop where we are asked to make our `bet` and to choose the number (`choice`) we hope to see after spinning the roulette.
 
@@ -55,7 +55,7 @@ long get_long() {
     return l;
 }
 ```
-Initially `c` is not a digit (it is set to `0` that is the null character) so the function enters the first `while` and, since `stdin` is line buffered, `get_char()` will wait for us to press ENTER. At this point the program will start scanning the buffer one character at a time doing nothing if it is a non-digit (first `while` loop). When a digit is encountered the first loop ends end we enter the second one that will run until we get another non-digit character: the second loop will end and we will enter the third one that keeps ignoring every character until a `\n` (new line character) is found that is the end of the input string. This means that the core of the function is in the second loop: an unsigned 64 bit integer `l` is constructed appending a digit at a time, that is if `l` is `123` and the next digit is `4`, then `l` will become `123*10 + 4` that is `1234`. Before doing these operations, it is checked if `l` is less than `LONG_MAX`, otherwise it will be set to `LONG_MAX` and the `while` will be terminated. `LONG_MAX` is the maximum value a `long` variable can assume and depends on the system: a `long` variable is guaranteed to be at least 32 bits wide but in some systems it can be 64 bit, in particular, the remote application uses 32 bit integers as `long` variables (see [**Solution**](#solution) section for details). We have to notice that `get_long()` returns a `long` variable (that is a signed 32 bit integer) while operations are executed on `l` that is an unsigned 64 bit integer. Moreover, the control `l >= LONG_MAX` is done before doing operations and not after, so we can have an `l` value that is less than `LONG_MAX` but after appending a digit it will become greater and, if the loop is interrupted, `l` will remain greater than `LONG_MAX`. This fact can be used to pass properly built values for `l` that, returned as `long`, will become negative. This will allow us to assign (almost) arbitrary values to `bet` (even negative ones), bypassing `bet <= cash` condition in `get_bet()` function.
+Initially `c` is not a digit (it is set to `0` that is the null character) so the function enters the first `while` and, since `stdin` is line buffered, `get_char()` will wait for us to press ENTER. At this point the program will start scanning the buffer one character at a time doing nothing if it is a non-digit (first `while` loop). When a digit is encountered the first loop ends end we enter the second one that will run until we get another non-digit character: the second loop will end and we will enter the third one that keeps ignoring every character until a `\n` (new line character) is found that is the end of the input string. This means that the core of the function is in the second loop: an unsigned 64 bit integer `l` is constructed appending a digit at a time, that is if `l` is `123` and the next digit is `4`, then `l` will become `123*10 + 4` that is `1234`. Before doing these operations, it is checked if `l` is less than `LONG_MAX`, otherwise it will be set to `LONG_MAX` and the `while` will be terminated. `LONG_MAX` is the maximum value a `long` variable can assume and depends on the system: a `long` variable is guaranteed to be at least 32 bits wide but in some systems it can be 64 bit, in particular, the remote application uses 32 bit integers as `long` variables (see [**Hard work**](#hard-work) section for details). We have to notice that `get_long()` returns a `long` variable (that is a signed 32 bit integer) while operations are executed on `l` that is an unsigned 64 bit integer. Moreover, the control `l >= LONG_MAX` is done before doing operations and not after, so we can have an `l` value that is less than `LONG_MAX` but after appending a digit it will become greater and, if the loop is interrupted, `l` will remain greater than `LONG_MAX`. This fact can be used to pass properly built values for `l` that, returned as `long`, will become negative. This will allow us to assign (almost) arbitrary values to `bet` (even negative ones), bypassing `bet <= cash` condition in `get_bet()` function.
 
 Returning to `main()`, after setting `bet` (and subtracting it from `cash`) and `choice`, `play_roulette(choice, bet)` is called:
 ```c
@@ -81,7 +81,7 @@ void play_roulette(long choice, long bet) {
 Variable `spin` is randomly set to a value in `[1, 32]` (calling `rand()`) then a useless animation is performed in `spin_roulette(spin)` and if `spin` is equal to our `choice`, we win, a random message is printed and `wins` variable is incremented by one. Otherwise two random message are printed to screen.
 
 
-## Solution
+## Hard work
 The two bugs the hint was referring to are these:
 1. the seed used for pseudo-random integer generation is visible in the original value of `cash`;
 2. `get_long()` function returns a signed integer while working on an unsigned one and constrains it to a maximum value only before doing operations.
@@ -198,7 +198,7 @@ How much will you wager?
 
 One could think to use this method even to reach one billion but there is a problem: roulette application sets a maximum number of wins to `16`, after which we are kicked out. Since our initial balance is at most `4999` and we can at most double our current balance at each bet (going all-in), we got a maximum win of `4999 * 2^16 = 327614464` that is way less than one billion.
 
-To get to one billion we must exploit the `get_long()` function. We already know that `get_long()` stores input into an unsigned 64 bit integer and returns a `long` variable (that is signed). First of all we have to know how many bits a `long` variable is in the remote syste. To do this let's notice that we can pass a non-negative integer less than `LONG_MAX` and, appending another digit, we can bypass the condition `l >= LONG_MAX` (since `l` was the number before appending the last digit). Now we have a value greater than `LONG_MAX`, this means that as an `unsigned long` number, it will have the most significant bit set to `1` and, converting to `long`, this corresponds to a negative number. Hence, to prove that `long` is exactly a 32 bit integer, we can evaluate `LONG_MAX` as `2^31 - 1 = 2147483647 = 0x7fffffff`. Now we can pass as input the number `LONG_MAX + 1 = 2^31 = 2147483648 = 0x80000000`, press `enter` and see what happens:
+To get to one billion we must exploit the `get_long()` function. We already know that `get_long()` stores input into an unsigned 64 bit integer and returns a `long` variable (that is signed). First of all we have to know how many bits a `long` variable is in the remote syste. To do this let's notice that we can pass a non-negative integer less than `LONG_MAX` and, appending another digit, we can bypass the condition `l >= LONG_MAX` (since `l` was the number before appending the last digit). Now we have a value greater than `LONG_MAX`, this means that as an `unsigned long` number, it will have the most significant bit set to `1` and, converting to `long`, this corresponds to a negative number. Hence, to prove that `long` is exactly a 32 bit integer, we can evaluate `LONG_MAX` as `2^31 - 1 = 2147483647 = 0x7fffffff`. Now we can pass as input the number `LONG_MAX + 1 = 2^31 = 2147483648 = 0x80000000`, press ENTER and see what happens:
 1. digits are read from left to right to build `l`;
 2. when we get to last but one digit we obtain `l = 214748364 = 0x0ccccccc`;
 3. the last character `8` is saved to `c` and results to be a digit;
@@ -226,15 +226,23 @@ Haha, lost all the money I gave you already? See ya later!</b>
 
 We can see a `0` where we should read twice the amount we bet `0x80000000`: this is because `2 * 0x80000000 = 0x100000000 = 2^32` is a 33 bit integer (in binary it is a `1` followed by 32 `0`'s) hence the most significant bit (`1`) will be cut off to make it fit 32 bits resulting on a 32 bits integer of only `0`'s (`(int32) 2^32 = 0x00000000 = 0`), this confirms that the remote application treats `long` variables are as 32 bits integers. Moreover we can see we have lost, this is because making the bet the program subtracts our `bet` from our current `cash` if `bet <= cash`. Since `bet` is a `long` variable (so it is signed) and it is equal to `0x80000000` (that has the sign bit set to `1`), `bet` is interpreted as `-2147483648` so the condition `bet <= cash` becomes `-2147483648 <= 3891` that is `true` and so `bet` can be subtracted from `cash`: `3891 - (-2147483648) = 2147487539 = 0x80000f33` that is negative if seen as a `long` variable (most signficant bit is `1`). Our new balance is negative and so we will lose.
 
-Our target is to pass an (unsigned) input such that converted to (signed) `long` becomes negative (so the most significant bit must be `1`). This way `bet` will be always less than `cash`. We want `cash - bet` to be greater than one billion (`0x3b9aca00`) so that losing a bet will make us gain money.
+Our target is to pass an input (unsigned) such that converted to `long` (signed) becomes negative (so the most significant bit must be `1`). This way `bet` will be always less than `cash`. We want `cash - bet` to be greater than one billion (`0x3b9aca00`) so that losing a bet will make us gain money.
 
 Let's call:
-* `x` the typed input without the last digit (so the last value of `l` that will be checked in `l >= LONG_MAX`);
-* `X = x*10 + C` the final input with `C in [0, 9]`, the unit digit;
+* `x` the typed input without the last digit (that is the last value of `l` checked in `l >= LONG_MAX`);
+* `X = x*10 + C` the final input with `C in [0, 9]` the unit digit;
 * `Y` the current value of `cash`.
 
-
-
+Now it's time for some math:
+1. Our first constraint is `x < LONG_MAX = 0x7fffffff = 2147483647`, otherwise, appending `C`, the condition `l >= LONG_MAX` will fail.
+2. To make `(long) X` negative we want `(ulong) X > 0x7fffffff`:
+    ```
+    X = x * 10 + C > 0x7fffffff 
+	--> x * 10 > 0x7fffffff - C
+	--> x > ceil((0x7fffffff-C)/10) > ceil(0x7fffffff / 10) - floor(C/10) = 0x0ccccccc
+	--> x >= 0x0ccccccd = 214748365
+    ```
+3. 
 
 
 
