@@ -270,154 +270,155 @@ To get to the solution follow these steps:
 6. Get your well deserved flag!
 
 Example:
+
 * Run remote service and take note of starting balance:
     <pre>
-$ nc 2018shell.picoctf.com 25443
-Welcome to ONLINE ROULETTE!
-Here, have $<b>49</b> to start on the house! You'll lose it all anyways >:)
-
-How much will you wager?
-Current Balance: $49     Current Wins: 0
->
-</pre>
+    $ nc 2018shell.picoctf.com 25443
+    Welcome to ONLINE ROULETTE!
+    Here, have $<b>49</b> to start on the house! You'll lose it all anyways >:)
+    
+    How much will you wager?
+    Current Balance: $49     Current Wins: 0
+    >
+    </pre>
 * Run `spin_results` using starting balance as argument and press ENTER three times:
-<pre>
-$ ./spin_results <b>49</b>
-Seed: 49
-
-Press ENTER to get the next spin result:
-Spin: <b>5</b>
-
-Press ENTER to get the next spin result:
-Spin: <b>20</b>
-
-Press ENTER to get the next spin result:
-Spin: <b>22</b>
-
-Press ENTER to get the next spin result:
-</pre>
+    <pre>
+    $ ./spin_results <b>49</b>
+    Seed: 49
+    
+    Press ENTER to get the next spin result:
+    Spin: <b>5</b>
+    
+    Press ENTER to get the next spin result:
+    Spin: <b>20</b>
+    
+    Press ENTER to get the next spin result:
+    Spin: <b>22</b>
+    
+    Press ENTER to get the next spin result:
+    </pre>
 * Get three wins on roulette betting using the three predictions above (in that order):
-<pre>
-$ nc 2018shell.picoctf.com 25443
-Welcome to ONLINE ROULETTE!
-Here, have $49 to start on the house! You'll lose it all anyways >:)
+    <pre>
+    $ nc 2018shell.picoctf.com 25443
+    Welcome to ONLINE ROULETTE!
+    Here, have $49 to start on the house! You'll lose it all anyways >:)
+    
+    How much will you wager?
+    Current Balance: $49     Current Wins: 0
+    > 0       
+    Choose a number (1-36)
+    > <b>5</b>
 
-How much will you wager?
-Current Balance: $49     Current Wins: 0
-> 0       
-Choose a number (1-36)
-> <b>5</b>
-
-Spinning the Roulette for a chance to win $0!
-
-Roulette  :  5 
-
-You're not cheating are you?
-
-How much will you wager?
-Current Balance: $49     Current Wins: 1
-> 0
-Choose a number (1-36)
-> <b>20</b>
-
-Spinning the Roulette for a chance to win $0!
-
-Roulette  :  20
-
-Darn, you got it right.
-
-How much will you wager?
-Current Balance: $49     Current Wins: 2
-> 0
-Choose a number (1-36)
-> <b>22</b>
-
-Spinning the Roulette for a chance to win $0!
-
-Roulette  :  22
-
-Wow.. Nice One!
-
-How much will you wager?
-<b>Current Balance: $49     Current Wins: 3</b>
->
-</pre>
+    Spinning the Roulette for a chance to win $0!
+    
+    Roulette  :  5 
+    
+    You're not cheating are you?
+    
+    How much will you wager?
+    Current Balance: $49     Current Wins: 1
+    > 0
+    Choose a number (1-36)
+    > <b>20</b>
+    
+    Spinning the Roulette for a chance to win $0!
+    
+    Roulette  :  20
+    
+    Darn, you got it right.
+    
+    How much will you wager?
+    Current Balance: $49     Current Wins: 2
+    > 0
+    Choose a number (1-36)
+    > <b>22</b>
+    
+    Spinning the Roulette for a chance to win $0!
+    
+    Roulette  :  22
+    
+    Wow.. Nice One!
+    
+    How much will you wager?
+    <b>Current Balance: $49     Current Wins: 3</b>
+    >
+    </pre>
 * Get another prediction that you DO NOT want to use:
-<pre>
-$ ./spin_results 49
-Seed: 49
+    <pre>
+    $ ./spin_results 49
+    Seed: 49
+    
+    Press ENTER to get the next spin result:
+    Spin: 5
+    
+    Press ENTER to get the next spin result:
+    Spin: 20
+    
+    Press ENTER to get the next spin result:
+    Spin: 22
+    
+    Press ENTER to get the next spin result:
+    Spin: <b>3</b>
 
-Press ENTER to get the next spin result:
-Spin: 5
-
-Press ENTER to get the next spin result:
-Spin: 20
-
-Press ENTER to get the next spin result:
-Spin: 22
-
-Press ENTER to get the next spin result:
-Spin: <b>3</b>
-
-Press ENTER to get the next spin result:
-</pre>
+    Press ENTER to get the next spin result:
+    </pre>
 * Bet any amount in `[2311290881, 3294967296]` on a number NOT equal to previous prediction:
-<pre>
-$ nc 2018shell.picoctf.com 25443
-Welcome to ONLINE ROULETTE!
-Here, have $49 to start on the house! You'll lose it all anyways >:)
+    <pre>
+    $ nc 2018shell.picoctf.com 25443
+    Welcome to ONLINE ROULETTE!
+    Here, have $49 to start on the house! You'll lose it all anyways >:)
+    
+    How much will you wager?
+    Current Balance: $49     Current Wins: 0
+    > 0       
+    Choose a number (1-36)
+    > 5
+    
+    Spinning the Roulette for a chance to win $0!
+    
+    Roulette  :  5 
+    
+    You're not cheating are you?
+    
+    How much will you wager?
+    Current Balance: $49     Current Wins: 1
+    > 0
+    Choose a number (1-36)
+    > 20
+    
+    Spinning the Roulette for a chance to win $0!
+    
+    Roulette  :  20
+    
+    Darn, you got it right.
+    
+    How much will you wager?
+    Current Balance: $49     Current Wins: 2
+    > 0
+    Choose a number (1-36)
+    > 22
+    
+    Spinning the Roulette for a chance to win $0!
+    
+    Roulette  :  22
+    
+    Wow.. Nice One!
 
-How much will you wager?
-Current Balance: $49     Current Wins: 0
-> 0       
-Choose a number (1-36)
-> 5
-
-Spinning the Roulette for a chance to win $0!
-
-Roulette  :  5 
-
-You're not cheating are you?
-
-How much will you wager?
-Current Balance: $49     Current Wins: 1
-> 0
-Choose a number (1-36)
-> 20
-
-Spinning the Roulette for a chance to win $0!
-
-Roulette  :  20
-
-Darn, you got it right.
-
-How much will you wager?
-Current Balance: $49     Current Wins: 2
-> 0
-Choose a number (1-36)
-> 22
-
-Spinning the Roulette for a chance to win $0!
-
-Roulette  :  22
-
-Wow.. Nice One!
-
-How much will you wager?
-Current Balance: $49     Current Wins: 3
-> <b>2311290881</b>
-Choose a number (1-36)
-> <b>1</b>
-
-Spinning the Roulette for a chance to win $327614466!
-
-Roulette  :  3 
-
-<b>Nice try..
-If you keep it up, maybe you'll get the flag in 100000000000 years
-
-*** Current Balance: $1983676464 ***
-Wow, I can't believe you did it.. You deserve this flag!
-picoCTF{1_h0p3_y0u_f0uNd_b0tH_bUg5_8b7aef91}</b>
-</pre>
+    How much will you wager?
+    Current Balance: $49     Current Wins: 3
+    > <b>2311290881</b>
+    Choose a number (1-36)
+    > <b>1</b>
+    
+    Spinning the Roulette for a chance to win $327614466!
+    
+    Roulette  :  3 
+    
+    <b>Nice try..
+    If you keep it up, maybe you'll get the flag in 100000000000 years
+    
+    *** Current Balance: $1983676464 ***
+    Wow, I can't believe you did it.. You deserve this flag!
+    picoCTF{1_h0p3_y0u_f0uNd_b0tH_bUg5_8b7aef91}</b>
+    </pre>
 * Flag: `picoCTF{1_h0p3_y0u_f0uNd_b0tH_bUg5_8b7aef91}`.
