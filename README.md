@@ -197,3 +197,25 @@ How much will you wager?
 </pre>
 
 One could think to use this method even to reach one billion but there is a problem: roulette application sets a maximum number of wins to `16`, after which we are kicked out. Since our initial balance is at most `4999` and we can at most double our current balance at each bet (going all-in), we got a maximum win of `4999 * 2^16 = 327614464` that is way less than one billion.
+
+To get to one billion we must exploit the `get_long()` function. We already know that `get_long()` stores input into an unsigned 64 bit integer and returns a `long` variable (that is signed). First of all we have to know how many bits a `long` variable is in the remote syste. To do this let's notice that we can pass a non-negative integer less than `LONG_MAX` and, appending another digit, we can bypass the condition `l >= LONG_MAX` (since `l` was the number before appending the last digit). Now we have a value greater than `LONG_MAX`, this means that as an `unsigned long` number, it will have the most significant bit set to `1` and, converting to `long`, this corresponds to a negative number. Hence, to prove that `long` is exactly a 32 bit integer, we can evaluate `LONG_MAX` as `2^31 - 1 = 2147483647 = 0x7fffffff`. Now we can pass as input the number `LONG_MAX + 1 = 2^31 = 2147483648 = 0x80000000`, press `enter` and see what happens:
+1. digits are read from left to right to build `l`;
+2. when we get to last but one digit we obtain `l = 214748364 = 0x0ccccccc`;
+3. the last character `8` is saved to `c` and results to be a digit;
+4. `l` is less than `LONG_MAX` (`0x0ccccccc < 0x7fffffff`) so we skip the `if` block;
+5. `l` becomes `214748364*10 + 8 = 2147483648` and another character is saved to `c`;
+6. `c` is `\n` so it isn't a digit, the current `while` is interrupted and the next one fails so `l` is returned as a `long` variable.
+
+Now we can see that if `long` variables are more than 32 bits long nothing will happen to the result since `2147483648 = 2^31` could be represented as a  positive signed integer of at least 33 bits (the most significant bit will `0` so it will represent a positive number), instead the program will print this output:
+<pre>
+...
+Current Balance: $3891   Current Wins: 0
+> <b>2147483648</b>
+Choose a number (1-36)
+> 1
+
+Spinning the Roulette for a chance to win $<b>0</b>!
+...
+</pre>
+
+We see `0` where we should read twice the amount we bet: this is because `2 * 2147483648 = 2 * 2^31 = 2^32` is a 33 bit integer, in binary it is a `1` followed by 32 `0`'s, so, the most significant bit (`1`) will be cut off to fit 32 bits resulting on a 32 bits integer of only `0`'s (`2^32 as int32 = 0x00000000 = 0`), this confirms that the remote application treats `long` variables are as 32 bits integers.
