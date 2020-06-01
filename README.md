@@ -297,7 +297,7 @@ Example:
     
     Press ENTER to get the next spin result:
     </pre>
-* Get three wins on roulette betting using the three predictions above (in that order):
+* Get three wins on roulette by making bets using the three predictions above (in that order):
     <pre>
     $ nc 2018shell.picoctf.com 25443
     Welcome to ONLINE ROULETTE!
