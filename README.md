@@ -361,7 +361,7 @@ Spin: <b>3</b>
 
 Press ENTER to get the next spin result:
 </pre>
-* Bet any amount in `[2311290881, 3294967296]` on a number NOT EQUAL to previous prediction:
+* Bet any amount in `[2311290881, 3294967296]` on a number NOT equal to previous prediction:
 <pre>
 $ nc 2018shell.picoctf.com 25443
 Welcome to ONLINE ROULETTE!
