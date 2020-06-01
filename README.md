@@ -215,7 +215,27 @@ Choose a number (1-36)
 > 1
 
 Spinning the Roulette for a chance to win $<b>0</b>!
-...
+
+Roulette  :  29
+
+<b>Better luck next time...                                                             
+Just give up!                                                                        
+                                                                                     
+Haha, lost all the money I gave you already? See ya later!</b>
 </pre>
 
-We see `0` where we should read twice the amount we bet: this is because `2 * 2147483648 = 2 * 2^31 = 2^32` is a 33 bit integer, in binary it is a `1` followed by 32 `0`'s, so, the most significant bit (`1`) will be cut off to fit 32 bits resulting on a 32 bits integer of only `0`'s (`2^32 as int32 = 0x00000000 = 0`), this confirms that the remote application treats `long` variables are as 32 bits integers.
+We can see a `0` where we should read twice the amount we bet `0x80000000`: this is because `2 * 0x80000000 = 0x100000000 = 2^32` is a 33 bit integer (in binary it is a `1` followed by 32 `0`'s) hence the most significant bit (`1`) will be cut off to make it fit 32 bits resulting on a 32 bits integer of only `0`'s (`(int32) 2^32 = 0x00000000 = 0`), this confirms that the remote application treats `long` variables are as 32 bits integers. Moreover we can see we have lost, this is because making the bet the program subtracts our `bet` from our current `cash` if `bet <= cash`. Since `bet` is a `long` variable (so it is signed) and it is equal to `0x80000000` (that has the sign bit set to `1`), `bet` is interpreted as `-2147483648` so the condition `bet <= cash` becomes `-2147483648 <= 3891` that is `true` and so `bet` can be subtracted from `cash`: `3891 - (-2147483648) = 2147487539 = 0x80000f33` that is negative if seen as a `long` variable (most signficant bit is `1`). Our new balance is negative and so we will lose.
+
+Our target is to pass an (unsigned) input such that converted to (signed) `long` becomes negative (so the most significant bit must be `1`). This way `bet` will be always less than `cash`. We want `cash - bet` to be greater than one billion (`0x3b9aca00`) so that losing a bet will make us gain money.
+
+Let's call:
+* `x` the typed input without the last digit (so the last value of `l` that will be checked in `l >= LONG_MAX`);
+* `X = x*10 + C` the final input with `C in [0, 9]`, the unit digit;
+* `Y` the current value of `cash`.
+
+
+
+
+
+
+Since starting value of `cash` is in `[1, 4999]` (I don't consider `0` because we would be kicked out in the beginning) and `MAX_WINS = 16`, after
