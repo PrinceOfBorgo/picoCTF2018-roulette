@@ -206,7 +206,7 @@ To get to one billion we must exploit the `get_long()` function. We already know
 5. `l` becomes `214748364*10 + 8 = 2147483648` and another character is saved to `c`;
 6. `c` is `\n` so it isn't a digit, the current `while` is interrupted and the next one fails so `l` is returned as a `long` variable.
 
-Now we can see that if `long` variables are more than 32 bits long nothing will happen to the result since `2147483648 = 2^31` could be represented as a  positive signed integer of at least 33 bits (the most significant bit will `0` so it will represent a positive number), instead the program will print this output:
+Now we can see that if `long` variables are more than 32 bits long nothing will happen to the result since `2147483648 = 2^31` could be represented as a  positive signed integer of at least 33 bits (the most significant bit will be `0` so it will represent a positive number), instead the program will print this output:
 <pre>
 ...
 Current Balance: $3891   Current Wins: 0
