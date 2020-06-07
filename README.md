@@ -86,7 +86,7 @@ The two bugs the hint was referring to are these:
 1. the seed used for pseudo-random integer generation is visible in the original value of `cash`;
 2. `get_long()` function returns a signed integer while working on an unsigned one and constrains it to a maximum value only before doing operations.
 
-I created an [application](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) (click [here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) for source code) that takes as input the seed we want to use to generate random numbers and, pressing ENTER, prints the numbers obtained spinning the roulette.
+I created an [application](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) (click [here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) for source code) that takes as argument the seed we want to use to generate random numbers and, pressing ENTER, prints the numbers obtained spinning the roulette.
 
 Now we can run the remote service, take note of the random generated seed (readable in our starting balance) and run `spin_results` with that same seed as argument. This way, pressing ENTER, we will get our first random `spin` result: using this as our `choice` in the remote service we will get our first win.  
 Let's see an example:
