@@ -230,7 +230,7 @@ Our target is to pass an input (unsigned) such that converted to `long` (signed)
 
 Let's call:
 * `x` the typed input without the last digit (that is the last value of `l` checked in `l >= LONG_MAX`);
-* `X = x*10 + C` the final input with `C in [0, 9]` the unit digit (so `bet = (long) X`);
+* `X = x*10 + C` the final input with `C` in `[0, 9]` the unit digit (so `bet = (long) X`);
 * `Y` the current value of `cash`.
 
 Now it's time for some math:
@@ -243,7 +243,7 @@ Now it's time for some math:
     Since Y >= 1 --> X < 1 + 0xc4653600 --> X < 0xc4653601
     --> X <= 0xc4653600 = 3294967296
     </pre>
-    Hence `X <= 3294967296`. This condition is stronger than 1;
+    Hence `X <= 3294967296`. This condition is stronger than 1 (`x <= 329496729 < 2147483647`);
 3. We also want `cash - bet` to be positive, so it must be less than or equal to `LONG_MAX = 0x7fffffff`:
     <pre>
     Y - X <= 0x7fffffff
@@ -256,7 +256,7 @@ Now it's time for some math:
     Hence `X >= 2311290881`.
 
 So our input must be in range `[2311290881, 3294967296]`.
-This way we found an interval for our input that assures us that the `bet` will be interpreted as a negative number that subtracted from `cash` will make us gain one billion :D
+This way we found an interval for our input that assures us that `bet` will be interpreted as a negative number that subtracted from `cash` will make us gain one billion :D
 
 N.B. theoretically we can have more than `4999*2 ^ 15 = 163807232` as our current balance, for example having `cash = 1` and `bet = 3294967297`, losing the bet we get to exactly one billion (that is not sufficient to win, we have to overcome it): the point of the previous calculations is to find a good range to use if the only losing bet is the last one, i.e the one that bring us to one billion.
 
