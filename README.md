@@ -266,7 +266,7 @@ To get to the solution follow these steps:
 2. Press ENTER in `spin_results` to know what number you have to choose in order to win in the remote application. Use it in the remote application with any amount not greater than your current balance (e.g. use `0`);
 3. Repeat step 2 other two times to obtain three wins;
 4. Set your bet to any amount in range `[2311290881, 3294967296]`;
-5. You want to lose this bet: press ENTER in `spin_results` to know what number you DO NOT have to choose in the remote application.
+5. You want to lose this bet: press ENTER in `spin_results` to know what number you must NOT choose in the remote application.
 6. Get your well deserved flag!
 
 Example:
