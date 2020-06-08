@@ -262,7 +262,7 @@ N.B. theoretically we can have more than `4999*2 ^ 15 = 163807232` as our curren
 
 ## Solution
 To get to the solution follow these steps:
-1. Run the remote application and take note of the starting balance value then use it as first argument running `spin_results` application ([download it here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) it or compile the [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) with `gcc spin_results.c -o spin_results`);
+1. Run the remote application and take note of the starting balance value then use it as first argument running `spin_results` application ([download it here](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results) or compile the [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/spin_results.c) with `gcc spin_results.c -o spin_results`);
 2. Press ENTER in `spin_results` to know what number you have to choose in order to win in the remote application. Use it in the remote application with any amount not greater than your current balance (e.g. use `0`);
 3. Repeat step 2 other two times to obtain three wins;
 4. Set your bet to any amount in range `[2311290881, 3294967296]`;
