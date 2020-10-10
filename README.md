@@ -250,7 +250,7 @@ Now it's time for some math:
     --> -X <= 0x7fffffff - Y
     --> X >= Y - 0x7fffffff = Y + 0x80000001 (<a href="https://en.wikipedia.org/wiki/Two%27s_complement">two's complement</a>)
     We got at most 15 wins (at 16 we are kicked out) so:
-    Y <= 4999*2 ^ 15 = 163807232 --> X >= 163807232 + 0x80000001 --> X >= 0x89c38001
+    Y <= 4999 * 2^15 = 163807232 --> X >= 163807232 + 0x80000001 --> X >= 0x89c38001
     --> X >= 0x89c38001 = 2311290881
     </pre>
     Hence `X >= 2311290881`.
