@@ -258,7 +258,7 @@ Now it's time for some math:
 So our input must be in range `[2311290881, 3294967296]`.
 This way we found an interval for our input that assures us that `bet` will be interpreted as a negative number that subtracted from `cash` will make us gain one billion :D
 
-N.B. theoretically we can have more than `4999*2 ^ 15 = 163807232` as our current balance, for example having `cash = 1` and `bet = 3294967297`, losing the bet we get to exactly one billion (that is not sufficient to win, we have to overcome it): the point of the previous calculations is to find a good range to use if the only losing bet is the last one, i.e the one that bring us to one billion.
+N.B. theoretically we can have more than `4999 * 2^15 = 163807232` as our current balance, for example having `cash = 1` and `bet = 3294967297`, losing the bet we get to exactly one billion (that is not sufficient to win, we have to overcome it): the point of the previous calculations is to find a good range to use if the only losing bet is the last one, i.e the one that bring us to one billion.
 
 ## Solution
 To get to the solution follow these steps:
