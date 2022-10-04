@@ -10,9 +10,9 @@ Port may be different.
 
 
 ## Problem description
-Connecting to server we can see a welcome page of a roulette service. We are assigned a random initial balance to start betting. We are asked to make our bet and to choose a number. That's enough, let's see the provided [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette.c).
+Connecting to the server we can see a welcome page of a roulette service. We are assigned a random initial balance to start betting. We are asked to make our bet and to choose a number. That's enough, let's see the provided [source code](https://github.com/PrinceOfBorgo/picoCTF2018-roulette/blob/master/roulette.c).
 
-First let's see what we have to do in order to get the flag. As seen in the request we must gain one billion but, actually, it isn't enough... In `main()` we can see that two conditions must be verified to call `print_flag()` function: `cash > ONE_BILLION` and `wins >= HOTSTREAK`. The first condition sounds familiar but the second one tells us to win at least three times (`HOTSTREAK = 3`).
+First let's see what we have to do in order to get the flag. As seen in the request we must gain one billion but, actually, it isn't enough... In `main()` we can see that two conditions must be satisfied to call `print_flag()` function: `cash > ONE_BILLION` and `wins >= HOTSTREAK`. The first condition sounds familiar but the second one tells us to win at least three times (`HOTSTREAK = 3`).
 
 Our current balance is stored in `cash` variable that is initialized in `main()` calling `get_rand()` function:
 ```c
@@ -55,7 +55,7 @@ long get_long() {
     return l;
 }
 ```
-Initially `c` is not a digit (it is set to `0` that is the null character) so the function enters the first `while` and, since `stdin` is line buffered, `get_char()` will wait for us to press ENTER. At this point the program will start scanning the buffer one character at a time doing nothing if it is a non-digit (first `while` loop). When a digit is encountered the first loop ends and we enter the second one that will run until we get another non-digit character: the second loop will end and we will enter the third one that keeps ignoring every character until a `\n` (new line character) is found that is the end of the input string. This means that the core of the function is in the second loop: a 64-bit unsigned integer `l` is constructed appending a digit at a time, that is if `l` is `123` and the next digit is `4`, then `l` will become `123*10 + 4` that is `1234`. Before doing these operations, it is checked if `l` is less than `LONG_MAX`, otherwise it will be set to `LONG_MAX` and the `while` will be terminated. `LONG_MAX` is the maximum value a `long` variable can assume and depends on the system: a `long` variable is guaranteed to be at least 32 bits wide but in some systems it can be 64 bits, in particular, the remote application uses 32-bit integers as `long` variables (see [**Hard work**](#hard-work) section for details). We have to notice that `get_long()` returns a `long` variable (that is a 32-bit signed integer) while operations are executed on `l` that is a 64-bit unsigned integer. Moreover, checking `l >= LONG_MAX` is done before doing operations and not after, so we can have an `l` value that is less than `LONG_MAX` but after appending a digit it will become greater and, if the loop is interrupted, `l` will remain greater than `LONG_MAX`. This fact can be used to pass properly built values for `l` that, returned as `long`, will become negative. This will allow us to assign (almost) arbitrary values to `bet` (even negative ones), bypassing `bet <= cash` condition in `get_bet()` function.
+Initially `c` is not a digit (it is set to `0` that is the null character) so the function enters the first `while` and, since `stdin` is line buffered, `get_char()` will wait for us to press ENTER. At this point the program will start scanning the buffer one character at a time doing nothing if it is a non-digit (first `while` loop). When a digit is encountered the first loop ends and we enter the second one that will run until we get another non-digit character: the second loop will end and we will enter the third one that keeps ignoring every character until a `\n` (new line character) is found that is the end of the input string. This means that the core of the function is in the second loop: a 64-bit unsigned integer `l` is constructed appending a digit at a time, that is if `l` is `123` and the next digit is `4`, then `l` will become `123*10 + 4` that is `1234`. Before doing these operations, it is checked if `l` is less than `LONG_MAX`, otherwise it will be set to `LONG_MAX` and the `while` will be terminated. `LONG_MAX` is the maximum value a `long` variable can assume and depends on the system: a `long` variable is guaranteed to be at least 32 bits wide but in some systems it can be 64 bits, in particular, the remote application uses 32-bit integers as `long` variables (see [**Hard work**](#hard-work) section for details). We have to notice that `get_long()` returns a `long` variable (that is a 32-bit signed integer) while operations are executed on `l` that is a 64-bit unsigned integer. Moreover, checking `l >= LONG_MAX` is done before doing operations and not after, so we can have an `l` value that is less than `LONG_MAX` but after appending a digit it will become greater and, if the loop is interrupted, `l` will remain greater than `LONG_MAX`. This fact can be used to pass properly built values for `l` that, returned as `long`, will become negative. This will allow us to assign (almost) arbitrary values to `bet` (even negative ones), bypassing the condition `bet <= cash` in `get_bet()` function.
 
 Returning to `main()`, after setting `bet` (and subtracting it from `cash`) and `choice`, `play_roulette(choice, bet)` is called:
 ```c
@@ -196,7 +196,7 @@ How much will you wager?
 >
 </pre>
 
-One could think to use this method even to reach one billion but there is a problem: roulette application sets a maximum number of wins to `16`, after which we are kicked out. Since our initial balance is at most `4999` and we can at most double our current balance at each bet (going all-in), we got a maximum win of `4999 * 2^16 = 327614464` that is way less than one billion.
+One could think to use this method even to reach one billion but there is a problem: the roulette application sets a maximum number of wins to `16`, after which we are kicked out. Since our initial balance is at most `4999` and we can at most double our current balance at each bet (going all-in), we got a maximum win of `4999 * 2^16 = 327614464` that is way less than one billion.
 
 To get to one billion we must exploit the `get_long()` function. We already know that `get_long()` stores input into a 64-bit unsigned integer and returns a `long` variable (that is signed). First of all we have to know how many bits a `long` variable is in the remote system. To do this let's notice that we can pass a non-negative integer less than `LONG_MAX` and, appending another digit, we can bypass the condition `l >= LONG_MAX` (since `l` was the number before appending the last digit). Now we have a value greater than `LONG_MAX`, this means that as an `unsigned long` number, it will have the most significant bit set to `1` and, converting to `long`, this corresponds to a negative number. Hence, to prove that `long` is exactly 32 bits wide, we can evaluate `LONG_MAX` as `2^31 - 1 = 2147483647 = 0x7fffffff`. Now we can pass as input the number `LONG_MAX + 1 = 2^31 = 2147483648 = 0x80000000`, press ENTER and see what happens:
 1. digits are read from left to right to build `l`;
@@ -243,7 +243,7 @@ Now it's time for some math:
     Since Y >= 1 --> X < 1 + 0xc4653600 --> X < 0xc4653601
     --> X <= 0xc4653600 = 3294967296
     </pre>
-    Hence `X <= 3294967296`. This condition is stronger than 1 (`x <= 329496729 < 2147483647`);
+    Hence `X <= 3294967296`. This condition is stronger than condition 1 (`x <= 329496729 < 2147483647`);
 3. We also want `cash - bet` to be positive, so it must be less than or equal to `LONG_MAX = 0x7fffffff`:
     <pre>
     Y - X <= 0x7fffffff
@@ -256,7 +256,7 @@ Now it's time for some math:
     Hence `X >= 2311290881`.
 
 So our input must be in range `[2311290881, 3294967296]`.
-This way we found an interval for our input that assures us that `bet` will be interpreted as a negative number that subtracted from `cash` will make us gain one billion :D
+This way we found an interval for our input that ensures us that `bet` will be interpreted as a negative number that, subtracted from `cash`, will make us gain one billion :D
 
 N.B. theoretically we can have more than `4999 * 2^15 = 163807232` as our current balance, for example having `cash = 1` and `bet = 3294967297`, losing the bet we get to exactly one billion (that is not sufficient to win, we have to overcome it): the point of the previous calculations is to find a good range to use if the only losing bet is the last one, i.e the one that bring us to one billion.
 
